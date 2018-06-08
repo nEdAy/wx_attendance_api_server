@@ -1,6 +1,6 @@
 ## 服务端配置文件
 
-## 是否调试
+## 是否调试 debug 、 release
 mode = "release"
 
 ## http 监听
