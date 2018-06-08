@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package wx_cos_auth;
+
+service WXCosAuth {
+  rpc GetAuthData (GetAuthDataRequest) returns (GetAuthDataReply) {}
+}
+
+message GetAuthDataRequest {
+  string method = 1;
+  string pathname = 2;
+}
+
+message GetAuthDataReply {
+  string auth_data = 1;
+}
