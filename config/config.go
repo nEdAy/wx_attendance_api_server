@@ -1,73 +1,114 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"github.com/naoina/toml"
+	"github.com/go-ini/ini"
 )
 
-var Conf *Config
+var (
+	Cfg *ini.File
 
-// Config 系统根配置
-type Config struct {
-	Mode      string       `toml:"mode"`
-	Http      *HTTPConfig  `toml:"http"`
-	MySQL     *MySQLConfig `toml:"mysql"`
-}
+	App      app
+	Server   server
+	Path     path
+	Database database
+)
 
-// HTTPConfig http监听配置
-type HTTPConfig struct {
-	Address string `toml:"address"`
-	Port    int    `toml:"port"`
-}
-
-// Init http配置
-func (hc *HTTPConfig) Init() {
-	if hc.Address == "" {
-		hc.Address = "0.0.0.0"
-	}
-	if hc.Port == 0 {
-		hc.Port = 443
-	}
-}
-
-// NewConfig 初始化一个配置文件对象
-func NewConfig(configPath string) (*Config, error) {
-	if configPath == "" {
-		configPath = fmt.Sprintf(".%sdata%sconfig.toml", string(os.PathSeparator), string(os.PathSeparator))
-	}
-	log.Println(configPath)
-
-	f, err := os.Open(configPath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	config := new(Config)
-	if err := toml.NewDecoder(f).Decode(config); err != nil {
-		return nil, err
-	}
-
-	if config.Http == nil {
-		return nil, errors.New("http配置不能为空")
-	}
-	config.Http.Init()
-	Conf = config
-	return config, nil
-}
-
-// Duration 用于日志文件解析出时间段
-type Duration struct {
-	time.Duration
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler
-func (d *Duration) UnmarshalText(text []byte) error {
+func Init() {
 	var err error
-	d.Duration, err = time.ParseDuration(string(text))
-	return err
+	Cfg, err = ini.Load("conf/app.ini")
+	Cfg.BlockMode = false // if false, only reading, speed up read operations about 50-70% faster
+	if err != nil {
+		log.Fatalf("Fail to parse 'conf/app.ini': %v", err)
+	}
+	loadApp()
+	loadServer()
+	loadPath()
+	loadDatabase()
+}
+
+func loadApp() {
+	sec, err := Cfg.GetSection("app")
+	if err != nil {
+		log.Fatalf("Fail to get section 'app': %v", err)
+	}
+	App.RunMode = sec.Key("RUN_MODE").MustString("debug")
+}
+
+func loadServer() {
+	sec, err := Cfg.GetSection("server")
+	if err != nil {
+		log.Fatalf("Fail to get section 'server': %v", err)
+	}
+	Server.Protocol = sec.Key("PROTOCOL").In("http", []string{"http", "https"})
+	Server.Host = sec.Key("HOST").MustString("127.0.0.1")
+	Server.Port = sec.Key("PORT").MustInt(80)
+	Server.ReadTimeout = time.Duration(sec.Key("READ_TIMEOUT").MustInt(60)) * time.Second
+	Server.WriteTimeout = time.Duration(sec.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
+}
+
+func loadPath() {
+	sec, err := Cfg.GetSection("paths")
+	if err != nil {
+		log.Fatalf("Fail to get section 'server': %v", err)
+	}
+	Path.DataPath = sec.Key("DATA_PATH").MustString("./runtime")
+	Path.LogPath = sec.Key("LOG_PATH").MustString("./runtime/log")
+	Path.CachePath = sec.Key("CACHE_PATH").MustString("./runtime/cache")
+	Path.CertFilePath = sec.Key("CERT_FILE_PATH").MustString("./data/ssl/ssl.cer")
+	Path.KeyFilePath = sec.Key("KEY_FILE_PATH").MustString("./data/ssl/ssl.key")
+}
+
+func loadDatabase() {
+	sec, err := Cfg.GetSection("database")
+	if err != nil {
+		log.Fatalf("Fail to get section 'server': %v", err)
+	}
+	Database.Debug = sec.Key("DEBUG").MustBool(false)
+	Database.Type = sec.Key("TYPE").MustString("mysql")
+	Database.User = sec.Key("USER").MustString("root")
+	Database.Password = sec.Key("PASSWORD").String()
+	Database.Host = sec.Key("HOST").String()
+	Database.Port = sec.Key("PORT").MustInt(3306)
+	Database.Name = sec.Key("NAME").String()
+	Database.TablePrefix = sec.Key("TABLE_PREFIX").String()
+	Database.MaxIdleConns = sec.Key("MAX_IDLE_CONNS").MustInt(64)
+	Database.MaxOpenConns = sec.Key("MAX_OPEN_CONNS").MustInt(24)
+	Database.PingInterval = time.Duration(sec.Key("PING_INTERVAL").MustInt(30)) * time.Second
+}
+
+type app struct {
+	RunMode string
+}
+
+type server struct {
+	Protocol     string
+	Host         string
+	Port         int
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+}
+
+type path struct {
+	DataPath     string
+	LogPath      string
+	CachePath    string
+	CertFilePath string
+	KeyFilePath  string
+}
+
+type database struct {
+	Debug        bool
+	Type         string
+	User         string
+	Password     string
+	Host         string
+	Port         int
+	Name         string
+	TablePrefix  string
+	MaxIdleConns int
+	MaxOpenConns int
+	PingInterval time.Duration
 }
