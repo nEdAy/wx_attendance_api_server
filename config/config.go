@@ -16,7 +16,7 @@ var (
 	Database database
 )
 
-func Init() {
+func Setup() {
 	var err error
 	Cfg, err = ini.Load("conf/app.ini")
 	Cfg.BlockMode = false // if false, only reading, speed up read operations about 50-70% faster

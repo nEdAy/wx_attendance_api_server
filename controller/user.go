@@ -6,23 +6,33 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/nEdAy/wx_attendance_api_server/model"
 	"github.com/nEdAy/wx_attendance_api_server/util"
-	"github.com/nEdAy/wx_attendance_api_server/internal/face"
 	"time"
 	"strconv"
 	"github.com/google/logger"
+	"github.com/nEdAy/wx_attendance_api_server/internal/face_recognition"
 )
 
 // Binding from Register JSON
-type RegisterModel struct {
+type registerModel struct {
 	Username     string `json:"username" binding:"required"`
 	Password     string `json:"password"`
 	PrefixCosUrl string `json:"prefixCosUrl" binding:"required"`
 	FileName     string `json:"fileName" binding:"required"`
 }
 
-// Register 添加用户
+// @Summary 添加用户
+// @Description register user by username,password,prefixCosUrl,fileName
+// @Accept  json
+// @Produce  json
+// @Param username query string true "Username"
+// @Param password query string false "Password"
+// @Param prefixCosUrl query string true "PrefixCosUrl"
+// @Param fileName query string true "FileName"
+// @Success 201 {string} json "{"id": "115"}"
+// @Failure 400 {string} json "{"error": error}"
+// @Router /v1/user/ [post]
 func Register(c *gin.Context) {
-	registerModel := new(RegisterModel)
+	registerModel := new(registerModel)
 	if err := c.ShouldBindWith(&registerModel, binding.JSON); err != nil {
 		renderJSONWithError(c, err.Error())
 		return
@@ -39,7 +49,7 @@ func Register(c *gin.Context) {
 	}
 
 	faceToken := util.UserPwdEncrypt(registerModel.Username)
-	faceCount, err := face.GetFaceCount(registerModel.PrefixCosUrl, registerModel.FileName, faceToken)
+	faceCount, err := face_recognition.GetFaceCount(registerModel.PrefixCosUrl, registerModel.FileName, faceToken)
 
 	if err != nil {
 		renderJSONWithError(c, err.Error())
@@ -84,7 +94,7 @@ func UserList(c *gin.Context) {
 }
 
 // Binding from Login JSON
-type LoginModel struct {
+type loginModel struct {
 	Username     string `json:"username" binding:"required"`
 	PrefixCosUrl string `json:"prefixCosUrl" binding:"required"`
 	FileName     string `json:"fileName" binding:"required"`
@@ -92,7 +102,7 @@ type LoginModel struct {
 
 // Login 登录
 func Login(c *gin.Context) {
-	loginUserModel := new(LoginModel)
+	loginUserModel := new(loginModel)
 	if err := c.ShouldBindWith(&loginUserModel, binding.JSON); err != nil {
 		renderJSONWithError(c, err.Error())
 		return
@@ -104,7 +114,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	isMatchFace, err := face.IsMatchFace(loginUserModel.PrefixCosUrl, loginUserModel.FileName, user.FaceToken)
+	isMatchFace, err := face_recognition.IsMatchFace(loginUserModel.PrefixCosUrl, loginUserModel.FileName, user.FaceToken)
 	if err != nil {
 		renderJSONWithError(c, err.Error())
 		return

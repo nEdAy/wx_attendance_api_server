@@ -1,0 +1,42 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /v1/user/:
+    post:
+      consumes:
+      - application/json
+      description: register user by username,password,prefixCosUrl,fileName
+      parameters:
+      - description: Username
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: query
+        name: password
+        type: string
+      - description: PrefixCosUrl
+        in: query
+        name: prefixCosUrl
+        required: true
+        type: string
+      - description: FileName
+        in: query
+        name: fileName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '{"id": "115"}'
+          schema:
+            type: string
+        "400":
+          description: '{"error": error}'
+          schema:
+            type: string
+      summary: 添加用户
+swagger: "2.0"

@@ -9,16 +9,16 @@ import (
 	"log"
 	"time"
 	"context"
-	"github.com/nEdAy/wx_attendance_api_server/internal/db"
 	"fmt"
 	"github.com/nEdAy/wx_attendance_api_server/config"
+	"github.com/nEdAy/wx_attendance_api_server/model"
 )
 
 func main() {
 	// 初始化Config
-	config.Init()
+	config.Setup()
 	// 初始化Database
-	db.Setup()
+	model.Setup()
 	// 配置Gin
 	gin.SetMode(config.App.RunMode)
 
@@ -30,7 +30,6 @@ func main() {
 
 	// 配置Router
 	r := router.SetupRouter()
-	r.Static("/assets", "./assets")
 
 	// Listen and Server in 127.0.0.1:8000
 	address := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)

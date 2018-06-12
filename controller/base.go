@@ -1,7 +1,7 @@
 package controller
 /*
 // Binding from Register JSON
-type RegisterModel struct {
+type registerModel struct {
 	Username     string `json:"username" binding:"required"`
 	Password     string `json:"password"`
 	PrefixCosUrl string `json:"prefixCosUrl" binding:"required"`
