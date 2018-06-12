@@ -1,4 +1,4 @@
-package main
+package voice_it
 
 import (
 	"github.com/voiceittech/voiceit-go/voiceit"
