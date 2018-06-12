@@ -10,9 +10,13 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
 	r.Use(gin.Logger())
+
 	r.Use(gin.Recovery())
+
 	r.Static("/assets", "./assets")
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Ping test
@@ -24,18 +28,19 @@ func SetupRouter() *gin.Engine {
 	{
 		user := v1.Group("/user")
 		{
-			// curl -X POST https://127.0.0.1/v1/user/ -d ""
+			// 注册用户 curl -X POST https://127.0.0.1/v1/user/ -d ""
 			user.POST("/", controller.Register)
-			// curl -X POST https://127.0.0.1/v1/user/login/ -d ""
+			// 用户登录 curl -X POST https://127.0.0.1/v1/user/login/ -d ""
 			user.POST("/login/", controller.Login)
-			// curl -X GET  https://127.0.0.1/v1/user/
+			// 获取全部用户 curl -X GET  https://127.0.0.1/v1/user/
 			user.GET("/", controller.UserList)
-			// curl -X DELETE https://127.0.0.1/v1/user/login/1
+			// 删除用户 curl -X DELETE https://127.0.0.1/v1/user/login/1
 			user.DELETE("/:id", controller.DelUser)
 		}
+
 		cos := v1.Group("/cos")
 		{
-			// curl -X GET  https://127.0.0.1/v1/cos/
+			// 获取鉴权签名 curl -X GET  https://127.0.0.1/v1/cos/
 			cos.GET("/", controller.GetAuthorization)
 		}
 	}
