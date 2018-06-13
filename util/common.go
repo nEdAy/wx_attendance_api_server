@@ -7,16 +7,17 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"path/filepath"
 )
 
 // GetRootDir 获取程序跟目录
 func GetRootDir() string {
 	// 文件不存在获取执行路径
-	/*file, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	file, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		file = "."
-	}*/
-	return ".\\data"
+	}
+	return file
 }
 
 // WritePidToFile 写pid到文件

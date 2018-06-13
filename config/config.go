@@ -16,7 +16,7 @@ var (
 	Database database
 )
 
-func Setup() {
+func init() {
 	var err error
 	Cfg, err = ini.Load("conf/app.ini")
 	Cfg.BlockMode = false // if false, only reading, speed up read operations about 50-70% faster
@@ -35,6 +35,7 @@ func loadApp() {
 		log.Fatalf("Fail to get section 'app': %v", err)
 	}
 	App.RunMode = sec.Key("RUN_MODE").MustString("debug")
+	App.JwtSecret = sec.Key("Jwt_Secret").MustString("123")
 }
 
 func loadServer() {
@@ -80,7 +81,8 @@ func loadDatabase() {
 }
 
 type app struct {
-	RunMode string
+	RunMode   string
+	JwtSecret string
 }
 
 type server struct {

@@ -5,9 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/EDDYCJY/go-gin-example/pkg/e"
-	"github.com/EDDYCJY/go-gin-example/pkg/util"
+	"github.com/nEdAy/wx_attendance_api_server/util"
 )
 
 func JWT() gin.HandlerFunc {
@@ -15,23 +13,23 @@ func JWT() gin.HandlerFunc {
 		var code int
 		var data interface{}
 
-		code = e.SUCCESS
+		code = http.StatusOK
 		token := c.Query("token")
 		if token == "" {
-			code = e.INVALID_PARAMS
+			code = http.StatusUnauthorized // http.INVALID_PARAMS
 		} else {
 			claims, err := util.ParseToken(token)
 			if err != nil {
-				code = e.ERROR_AUTH_CHECK_TOKEN_FAIL
+				code = http.StatusUnauthorized // http.ERROR_AUTH_CHECK_TOKEN_FAIL
 			} else if time.Now().Unix() > claims.ExpiresAt {
-				code = e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
+				code = http.StatusUnauthorized // http.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
 			}
 		}
 
-		if code != e.SUCCESS {
+		if code != http.StatusOK {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": code,
-				"msg":  e.GetMsg(code),
+				"msg":  http.StatusText(code),
 				"data": data,
 			})
 

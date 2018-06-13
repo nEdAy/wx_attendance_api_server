@@ -8,24 +8,22 @@ import (
 	_ "github.com/nEdAy/wx_attendance_api_server/docs"
 )
 
-func SetupRouter() *gin.Engine {
-	r := gin.Default()
+var Router *gin.Engine
 
-	r.Use(gin.Logger())
-
-	r.Use(gin.Recovery())
-
-	r.Static("/assets", "./assets")
-
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+func init() {
+	Router = gin.Default()
+	Router.Use(gin.Logger())
+	Router.Use(gin.Recovery())
+	Router.Static("/assets", "./assets")
+	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
+	Router.GET("/ping", func(c *gin.Context) {
 		c.String(200, "pong")
 	})
-
-	v1 := r.Group("/v1")
+	// v1
+	v1 := Router.Group("/v1")
 	{
+		// 用户相关API
 		user := v1.Group("/user")
 		{
 			// 注册用户 curl -X POST https://127.0.0.1/v1/user/ -d ""
@@ -37,12 +35,11 @@ func SetupRouter() *gin.Engine {
 			// 删除用户 curl -X DELETE https://127.0.0.1/v1/user/login/1
 			user.DELETE("/:id", controller.DelUser)
 		}
-
+		// COS相关API
 		cos := v1.Group("/cos")
 		{
 			// 获取鉴权签名 curl -X GET  https://127.0.0.1/v1/cos/
 			cos.GET("/", controller.GetAuthorization)
 		}
 	}
-	return r
 }

@@ -23,7 +23,7 @@ type Model struct {
 }
 
 // 初始化数据库
-func Setup() {
+func init() {
 	logger.Infoln("正在与数据库建立连接...")
 	// 连接数据库
 	var err error
@@ -48,9 +48,9 @@ func Setup() {
 		// debug 模式
 		DB = DB.Debug()
 	}
-	/*	DB.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
-		DB.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
-		DB.Callback().Delete().Replace("gorm:delete", deleteCallback)*/
+	// DB.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
+	// DB.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
+	// DB.Callback().Delete().Replace("gorm:delete", deleteCallback)
 	// 连接池最大连接数
 	DB.DB().SetMaxIdleConns(config.Database.MaxIdleConns)
 	// 默认打开连接数

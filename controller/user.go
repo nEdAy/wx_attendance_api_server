@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/nEdAy/wx_attendance_api_server/model"
-	"github.com/nEdAy/wx_attendance_api_server/util"
 	"time"
 	"strconv"
-	"github.com/google/logger"
 	"github.com/nEdAy/wx_attendance_api_server/internal/face_recognition"
+	"golang.org/x/crypto/scrypt"
 )
 
 // Binding from Register JSON
@@ -48,7 +47,8 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	faceToken := util.UserPwdEncrypt(registerModel.Username)
+	dkFaceToken, _ := scrypt.Key([]byte(registerModel.Username), []byte("nEdAy"), 32768, 8, 1, 32)
+	faceToken := string(dkFaceToken)
 	faceCount, err := face_recognition.GetFaceCount(registerModel.PrefixCosUrl, registerModel.FileName, faceToken)
 
 	if err != nil {
@@ -70,7 +70,8 @@ func Register(c *gin.Context) {
 
 	userModel := new(model.UserModel)
 	userModel.Username = registerModel.Username
-	userModel.Password = util.UserPwdEncrypt(registerModel.Password)
+	dkPassword, _ := scrypt.Key([]byte(registerModel.Password), []byte("nEdAy"), 32768, 8, 1, 32)
+	userModel.Password = string(dkPassword)
 	userModel.FaceUrl = registerModel.PrefixCosUrl + registerModel.FileName
 	userModel.FaceToken = faceToken
 	userModel.CreateTime = time.Now().Unix()
@@ -143,10 +144,4 @@ func DelUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, "ok")
-}
-
-func renderJSONWithError(c *gin.Context, error string) {
-	logger.Error(error)
-	c.JSON(http.StatusBadRequest, gin.H{"error": error})
-	return
 }
