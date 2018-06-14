@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/logger"
 	"github.com/jinzhu/gorm"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/nEdAy/wx_attendance_api_server/config"
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 // 数据库操作对象
@@ -23,8 +22,7 @@ type Model struct {
 }
 
 // 初始化数据库
-func init() {
-	logger.Infoln("正在与数据库建立连接...")
+func Setup() {
 	// 连接数据库
 	var err error
 	DB, err = gorm.Open(config.Database.Type,
@@ -35,7 +33,7 @@ func init() {
 			config.Database.Port,
 			config.Database.Name))
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal().Msg(err.Error())
 	}
 	// 设置表名前缀
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
@@ -62,13 +60,12 @@ func init() {
 			// ping
 			err = DB.DB().Ping()
 			if err != nil {
-				logger.Infoln(err)
+				log.Error().Msg(err.Error())
 			}
 			// 间隔30s ping一次
 			time.Sleep(config.Database.PingInterval)
 		}
 	}()
-	logger.Infoln("与数据库建立连接成功!")
 }
 
 // 关闭连接

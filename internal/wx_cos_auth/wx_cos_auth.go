@@ -1,10 +1,10 @@
 package wx_cos_auth
 
 import (
-	"log"
 	"google.golang.org/grpc"
 	"time"
 	"golang.org/x/net/context"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -16,7 +16,7 @@ func AuthorizationTransport(method string, pathname string) (string, error) {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		log.Fatal().Msgf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	client := NewWXCosAuthClient(conn)
@@ -26,9 +26,9 @@ func AuthorizationTransport(method string, pathname string) (string, error) {
 	defer cancel()
 	r, err := client.GetAuthData(ctx, &GetAuthDataRequest{Method: method, Pathname: pathname})
 	if err != nil {
-		log.Printf("could not AuthData: %v", err)
+		log.Error().Msgf("could not AuthData: %v", err)
 		return "", err
 	}
-	log.Printf("AuthData: %s", r.AuthData)
+	log.Info().Msgf("AuthData: %s", r.AuthData)
 	return r.AuthData, err
 }

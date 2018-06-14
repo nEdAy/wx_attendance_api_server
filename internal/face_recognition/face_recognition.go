@@ -1,11 +1,11 @@
 package face_recognition
 
 import (
-	"log"
 	"time"
 	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -16,7 +16,7 @@ func GetFaceCount(prefixCosUrl string, fileName string, faceToken string) (int32
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		log.Fatal().Msgf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := NewFaceRecognitionClient(conn)
@@ -25,10 +25,10 @@ func GetFaceCount(prefixCosUrl string, fileName string, faceToken string) (int32
 	defer cancel()
 	r, err := c.GetFaceCount(ctx, &GetFaceCountRequest{PrefixCosUrl: prefixCosUrl, FileName: fileName, FaceToken: faceToken})
 	if err != nil {
-		log.Printf("could not Count: %v", err)
+		log.Error().Msgf("could not Count: %v", err)
 		return -1, err
 	}
-	log.Printf("Count: %d", r.Count)
+	log.Info().Msgf("Count: %d", r.Count)
 	return r.Count, err
 }
 
@@ -36,7 +36,7 @@ func IsMatchFace(prefixCosUrl string, fileName string, faceToken string) (bool, 
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
-		log.Printf("did not connect: %v", err)
+		log.Fatal().Msgf("did not connect: %v", err)
 	}
 	defer conn.Close()
 	c := NewFaceRecognitionClient(conn)
@@ -45,9 +45,9 @@ func IsMatchFace(prefixCosUrl string, fileName string, faceToken string) (bool, 
 	defer cancel()
 	r, err := c.IsMatchFace(ctx, &IsMatchFaceRequest{PrefixCosUrl: prefixCosUrl, FileName: fileName, FaceToken: faceToken})
 	if err != nil {
-		log.Printf("could not IsMatchFace: %v", err)
+		log.Error().Msgf("could not IsMatchFace: %v", err)
 		return false, err
 	}
-	log.Printf("IsMatchFace: %t", r.IsMatchFace)
+	log.Info().Msgf("IsMatchFace: %t", r.IsMatchFace)
 	return r.IsMatchFace, err
 }

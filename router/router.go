@@ -10,7 +10,7 @@ import (
 
 var Router *gin.Engine
 
-func init() {
+func Setup() {
 	Router = gin.Default()
 	Router.Use(gin.Logger())
 	Router.Use(gin.Recovery())

@@ -2,7 +2,7 @@ package voice_it
 
 import (
 	"github.com/voiceittech/voiceit-go/voiceit"
-	"github.com/google/logger"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -15,13 +15,13 @@ func main() {
 
 	response := myVoiceIt.CreateUser("nEdAy", "abcd1234")
 
-	logger.Error(response)
+	log.Debug().Msg(response)
 
 	response = myVoiceIt.CreateEnrollmentByWavURL("nEdAy", "abcd1234", "http://face-recognition-1253284991.file.myqcloud.com/store_8495613369280acb2277fb3546a42d33.mp3 ", "en-US")
 
-	//logger.Error(response)
+	//log.Debug().Msg(response)
 
 	response = myVoiceIt.AuthenticationByWavURL("nEdAy", "abcd1234", "http://face-recognition-1253284991.file.myqcloud.com/store_07cf9886e258d6ef63e6fe84a6121839.mp3  ", "en-US")
 
-	logger.Error(response)
+	log.Debug().Msg(response)
 }

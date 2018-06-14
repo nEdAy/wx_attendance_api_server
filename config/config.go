@@ -1,10 +1,10 @@
 package config
 
 import (
-	"log"
 	"time"
 
 	"github.com/go-ini/ini"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -16,12 +16,12 @@ var (
 	Database database
 )
 
-func init() {
+func Setup() {
 	var err error
 	Cfg, err = ini.Load("conf/app.ini")
 	Cfg.BlockMode = false // if false, only reading, speed up read operations about 50-70% faster
 	if err != nil {
-		log.Fatalf("Fail to parse 'conf/app.ini': %v", err)
+		log.Fatal().Msgf("Fail to parse 'conf/app.ini': %v", err)
 	}
 	loadApp()
 	loadServer()
@@ -32,16 +32,16 @@ func init() {
 func loadApp() {
 	sec, err := Cfg.GetSection("app")
 	if err != nil {
-		log.Fatalf("Fail to get section 'app': %v", err)
+		log.Fatal().Msgf("Fail to get section 'app': %v", err)
 	}
-	App.RunMode = sec.Key("RUN_MODE").MustString("debug")
+	App.RunMode = sec.Key("RUN_MODE").In("debug", []string{"debug", "release"})
 	App.JwtSecret = sec.Key("Jwt_Secret").MustString("123")
 }
 
 func loadServer() {
 	sec, err := Cfg.GetSection("server")
 	if err != nil {
-		log.Fatalf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'server': %v", err)
 	}
 	Server.Protocol = sec.Key("PROTOCOL").In("http", []string{"http", "https"})
 	Server.Host = sec.Key("HOST").MustString("127.0.0.1")
@@ -53,7 +53,7 @@ func loadServer() {
 func loadPath() {
 	sec, err := Cfg.GetSection("paths")
 	if err != nil {
-		log.Fatalf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'server': %v", err)
 	}
 	Path.DataPath = sec.Key("DATA_PATH").MustString("./runtime")
 	Path.LogPath = sec.Key("LOG_PATH").MustString("./runtime/log")
@@ -65,7 +65,7 @@ func loadPath() {
 func loadDatabase() {
 	sec, err := Cfg.GetSection("database")
 	if err != nil {
-		log.Fatalf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'server': %v", err)
 	}
 	Database.Debug = sec.Key("DEBUG").MustBool(false)
 	Database.Type = sec.Key("TYPE").MustString("mysql")
