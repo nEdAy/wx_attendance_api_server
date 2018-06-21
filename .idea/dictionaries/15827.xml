@@ -1,7 +1,11 @@
 <component name="ProjectDictionaryState">
   <dictionary name="15827">
     <words>
+      <w>appid</w>
       <w>conns</w>
+      <w>errcode</w>
+      <w>errmsg</w>
+      <w>jscode</w>
       <w>syncer</w>
       <w>zerolog</w>
     </words>

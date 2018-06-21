@@ -8,10 +8,11 @@ import (
 type UserModel struct {
 	Model
 
-	Username  string `gorm:"column:username" json:"username"`
-	Password  string `gorm:"column:password" json:"password"`
-	FaceToken string `gorm:"column:face_token" json:"face_token"`
-	FaceUrl   string `gorm:"column:face_url" json:"face_url"`
+	OpenId     string `gorm:"column:openId" json:"openId"`
+	Username   string `gorm:"column:username" json:"username"`
+	Password   string `gorm:"column:password" json:"password"`
+	FaceToken  string `gorm:"column:face_token" json:"face_token"`
+	FaceUrl    string `gorm:"column:face_url" json:"face_url"`
 }
 
 // TableName 返回asc_door 表名称
@@ -23,6 +24,13 @@ func (UserModel) TableName() string {
 // last inserted Id on success.
 func AddUser(m *UserModel) (err error) {
 	err = DB.Create(m).Error
+	return err
+}
+
+// Get first matched record, or create a new one with given conditions (only works with struct, map conditions)
+// Found
+func FirstOrCreate(m *UserModel) (err error) {
+	err = DB.FirstOrCreate(m, UserModel{OpenId: m.OpenId}).Error
 	return err
 }
 

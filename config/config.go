@@ -14,6 +14,7 @@ var (
 	Server   server
 	Path     path
 	Database database
+	WeChat   weChat
 )
 
 func Setup() {
@@ -27,21 +28,22 @@ func Setup() {
 	loadServer()
 	loadPath()
 	loadDatabase()
+	loadWeChat()
 }
 
 func loadApp() {
-	sec, err := Cfg.GetSection("app")
+	sec, err := Cfg.GetSection("App")
 	if err != nil {
-		log.Fatal().Msgf("Fail to get section 'app': %v", err)
+		log.Fatal().Msgf("Fail to get section 'App': %v", err)
 	}
 	App.RunMode = sec.Key("RUN_MODE").In("debug", []string{"debug", "release"})
 	App.JwtSecret = sec.Key("Jwt_Secret").MustString("123")
 }
 
 func loadServer() {
-	sec, err := Cfg.GetSection("server")
+	sec, err := Cfg.GetSection("Server")
 	if err != nil {
-		log.Fatal().Msgf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'Server': %v", err)
 	}
 	Server.Protocol = sec.Key("PROTOCOL").In("http", []string{"http", "https"})
 	Server.Host = sec.Key("HOST").MustString("127.0.0.1")
@@ -51,9 +53,9 @@ func loadServer() {
 }
 
 func loadPath() {
-	sec, err := Cfg.GetSection("paths")
+	sec, err := Cfg.GetSection("Paths")
 	if err != nil {
-		log.Fatal().Msgf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'Paths': %v", err)
 	}
 	Path.DataPath = sec.Key("DATA_PATH").MustString("./runtime")
 	Path.LogPath = sec.Key("LOG_PATH").MustString("./runtime/log")
@@ -63,9 +65,9 @@ func loadPath() {
 }
 
 func loadDatabase() {
-	sec, err := Cfg.GetSection("database")
+	sec, err := Cfg.GetSection("Database")
 	if err != nil {
-		log.Fatal().Msgf("Fail to get section 'server': %v", err)
+		log.Fatal().Msgf("Fail to get section 'Database': %v", err)
 	}
 	Database.Debug = sec.Key("DEBUG").MustBool(false)
 	Database.Type = sec.Key("TYPE").MustString("mysql")
@@ -78,6 +80,18 @@ func loadDatabase() {
 	Database.MaxIdleConns = sec.Key("MAX_IDLE_CONNS").MustInt(64)
 	Database.MaxOpenConns = sec.Key("MAX_OPEN_CONNS").MustInt(24)
 	Database.PingInterval = time.Duration(sec.Key("PING_INTERVAL").MustInt(30)) * time.Second
+}
+
+func loadWeChat() {
+	sec, err := Cfg.GetSection("WeChat")
+	if err != nil {
+		log.Fatal().Msgf("Fail to get section 'WeChat': %v", err)
+	}
+	WeChat.CodeToSessionUrl = sec.Key("CODE_TO_SESSION_URL").String()
+	WeChat.AppID = sec.Key("APP_ID").String()
+	WeChat.AppSecret = sec.Key("APP_SECRET").String()
+	WeChat.SessionMagicID = sec.Key("SESSION_MAGIC_ID").String()
+
 }
 
 type app struct {
@@ -113,4 +127,11 @@ type database struct {
 	MaxIdleConns int
 	MaxOpenConns int
 	PingInterval time.Duration
+}
+
+type weChat struct {
+	CodeToSessionUrl string
+	AppID            string
+	AppSecret        string
+	SessionMagicID   string
 }

@@ -14,6 +14,7 @@ func Setup() {
 	Router = gin.Default()
 	Router.Use(gin.Logger())
 	Router.Use(gin.Recovery())
+	//Router.Use(jwt.JWT())
 	Router.Static("/assets", "./assets")
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Ping test
@@ -26,6 +27,9 @@ func Setup() {
 		// 用户相关API
 		user := v1.Group("/user")
 		{
+			// 微信小程序用户注册/登录 curl -X GET https://127.0.0.1/v1/user/token/ -d ""
+			user.GET("/token/", controller.WeAppLogin)
+
 			// 注册用户 curl -X POST https://127.0.0.1/v1/user/ -d ""
 			user.POST("/", controller.Register)
 			// 用户登录 curl -X POST https://127.0.0.1/v1/user/login/ -d ""

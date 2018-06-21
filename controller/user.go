@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"github.com/nEdAy/wx_attendance_api_server/internal/face_recognition"
 	"golang.org/x/crypto/scrypt"
+	"github.com/nEdAy/wx_attendance_api_server/config"
+	"github.com/nEdAy/wx_attendance_api_server/internal/mini_program"
+	"github.com/nEdAy/wx_attendance_api_server/util"
 )
 
 // Binding from Register JSON
@@ -128,6 +131,35 @@ func Login(c *gin.Context) {
 	user.Password = ""
 	user.FaceToken = ""
 	c.JSON(http.StatusOK, user)
+}
+
+// WeAppLogin 微信小程序登录
+func WeAppLogin(c *gin.Context) {
+	code := c.Query("code")
+	if code == "" {
+		renderJSONWithError(c, "code不能为空")
+		return
+	}
+	appID := config.WeChat.AppID
+	appSecret := config.WeChat.AppSecret
+
+	openid, sessionKey, err := mini_program.Login(appID, appSecret, code)
+
+	if err != nil {
+		renderJSONWithError(c, err.Error())
+		return
+	}
+
+	userModel := model.UserModel{OpenId: openid}
+	if err := model.FirstOrCreate(&userModel); err == nil {
+		if token, err := util.GenerateToken(openid, sessionKey); err == nil {
+			c.JSON(http.StatusCreated, gin.H{config.WeChat.SessionMagicID: 1, "token": token})
+		} else {
+			renderJSONWithError(c, err.Error())
+		}
+	} else {
+		renderJSONWithError(c, err.Error())
+	}
 }
 
 // DelUser 删除用户
