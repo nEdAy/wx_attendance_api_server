@@ -18,8 +18,7 @@ var (
 )
 
 func Setup() {
-	var err error
-	Cfg, err = ini.Load("conf/app.ini")
+	Cfg, err := ini.Load("conf/app.ini")
 	Cfg.BlockMode = false // if false, only reading, speed up read operations about 50-70% faster
 	if err != nil {
 		log.Fatal().Msgf("Fail to parse 'conf/app.ini': %v", err)
